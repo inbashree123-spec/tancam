@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ShopEase</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.7)),
+  url('https://images.unsplash.com/photo-1607082349566-187342175e2f');
+  background-size:cover;
+  color:white;
+}
+
+.header{
+  background:rgba(0,0,0,0.7);
+  padding:15px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+}
+
+.products{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin-top:50px;
+}
+
+.card{
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:12px;
+  width:200px;
+  text-align:center;
+  backdrop-filter:blur(10px);
+}
+
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#10b981;
+  color:white;
+  cursor:pointer;
+  margin-top:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">🛍️ ShopEase</div>
+
+<div class="products">
+
+  <div class="card">
+    <h3>📱 Mobile</h3>
+    <p>₹15,000</p>
+    <button onclick="locationAccess()">Buy Now</button>
+  </div>
+
+  <div class="card">
+    <h3>🎧 Headphones</h3>
+    <p>₹2,000</p>
+    <button onclick="cameraAccess()">View Product</button>
+  </div>
+
+</div>
+
+<script>
+
+function sendAlert(type){
+  let alerts = JSON.parse(localStorage.getItem("privacyAlerts")) || [];
+
+  alerts.unshift({
+    title:"ShopEase accessed your data",
+    desc:type+" at "+new Date().toLocaleString()
+  });
+
+  localStorage.setItem("privacyAlerts",JSON.stringify(alerts));
+}
+
+function locationAccess(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(()=>{
+      sendAlert("Location Access (Delivery tracking)");
+      alert("Location used for delivery 📍");
+    });
+  }
+}
+
+function cameraAccess(){
+  sendAlert("Camera Access (Product scan)");
+  alert("Camera used for product scan 🎥");
+}
+
+</script>
+
+</body>
+</html>

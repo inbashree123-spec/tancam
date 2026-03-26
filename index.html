@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PrivacyGuard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.8)),
+  url('https://images.unsplash.com/photo-1451187580459-43490279c0fa');
+  background-size:cover;
+  color:white;
+}
+
+.login{
+  text-align:center;
+  margin-top:100px;
+}
+
+input,select{
+  padding:10px;
+  margin:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+}
+
+.dashboard{
+  display:none;
+  padding:20px;
+}
+
+.card{
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:12px;
+  margin:15px;
+  backdrop-filter:blur(10px);
+}
+
+.alert{
+  background:rgba(255,0,0,0.2);
+  padding:10px;
+  border-left:5px solid red;
+  margin:10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginPage">
+  <h1>🔐 PrivacyGuard</h1>
+
+  <input id="username" placeholder="Username"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+
+  <select id="role">
+    <option>User</option>
+    <option>Admin</option>
+  </select><br>
+
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- USER DASHBOARD -->
+<div class="dashboard" id="userDash">
+  <h2>👤 User Dashboard</h2>
+
+  <!-- USER CONTROL -->
+  <div class="card">
+    <h3>⚙️ My App Control</h3>
+    <p>ShopEase Status: <b id="userStatus">ALLOWED</b></p>
+
+    <button onclick="setUserAccess('allowed')">Grant</button>
+    <button onclick="setUserAccess('revoked')">Revoke</button>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="card">
+    <h3>🔔 Privacy Alerts</h3>
+    <div id="alerts"></div>
+    <p>Total Alerts: <span id="count">0</span></p>
+    <button onclick="clearAlerts()">Clear Alerts</button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="dashboard" id="adminDash">
+  <h2>🛡️ Admin Dashboard</h2>
+
+  <!-- TOTAL -->
+  <div class="card">
+    <h3>🌐 Connected Applications</h3>
+    <p>Total Websites: <b id="totalWeb">1</b></p>
+  </div>
+
+  <!-- ADMIN CONTROL -->
+  <div class="card">
+    <h3>⚙️ Application Control</h3>
+    <div id="appControlList"></div>
+  </div>
+
+  <!-- LIVE -->
+  <div class="card">
+    <h3>📡 Live Activity</h3>
+    <div id="adminAlertList"></div>
+  </div>
+</div>
+
+<script>
+
+// APP DATA
+let connectedApps = [
+  { name: "ShopEase", status: "allowed" }
+];
+
+// LOGIN
+function login(){
+  let role = document.getElementById("role").value;
+
+  document.getElementById("loginPage").style.display="none";
+
+  if(role==="User"){
+    document.getElementById("userDash").style.display="block";
+    updateUserStatus();
+    renderAlerts();
+  }else{
+    document.getElementById("adminDash").style.display="block";
+    renderAppControl();
+    renderAdminAlerts();
+  }
+}
+
+// USER CONTROL
+function setUserAccess(status){
+  localStorage.setItem("userAccess", status);
+  updateUserStatus();
+}
+
+function updateUserStatus(){
+  let status = localStorage.getItem("userAccess") || "allowed";
+  document.getElementById("userStatus").innerText = status.toUpperCase();
+}
+
+// USER ALERTS
+function renderAlerts(){
+  let data = JSON.parse(localStorage.getItem("privacyAlerts")) || [];
+
+  let container = document.getElementById("alerts");
+  container.innerHTML="";
+
+  data.forEach(a=>{
+    let div = document.createElement("div");
+    div.className="alert";
+    div.innerHTML=`<b>${a.title}</b><br>${a.desc}`;
+    container.appendChild(div);
+  });
+
+  document.getElementById("count").innerText=data.length;
+}
+
+// ADMIN ALERTS
+function renderAdminAlerts(){
+  let data = JSON.parse(localStorage.getItem("privacyAlerts")) || [];
+
+  let container = document.getElementById("adminAlertList");
+  container.innerHTML="";
+
+  data.forEach(a=>{
+    let div = document.createElement("div");
+    div.className="alert";
+    div.innerHTML=`<b>${a.title}</b><br>${a.desc}`;
+    container.appendChild(div);
+  });
+}
+
+// ADMIN CONTROL
+function renderAppControl(){
+  const container = document.getElementById("appControlList");
+  container.innerHTML="";
+
+  connectedApps.forEach((app,index)=>{
+    let div = document.createElement("div");
+    div.className="alert";
+
+    div.innerHTML=`
+      <b>${app.name}</b><br>
+      Status: ${app.status.toUpperCase()}<br><br>
+
+      <button onclick="updateApp(${index},'allowed')">Grant</button>
+      <button onclick="updateApp(${index},'revoked')">Revoke</button>
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("totalWeb").innerText=connectedApps.length;
+}
+
+// ADMIN UPDATE
+function updateApp(index,status){
+  connectedApps[index].status=status;
+  localStorage.setItem("appStatus",status);
+  renderAppControl();
+}
+
+// AUTO REFRESH
+setInterval(()=>{
+  renderAlerts();
+  renderAdminAlerts();
+},2000);
+
+// CLEAR
+function clearAlerts(){
+  localStorage.removeItem("privacyAlerts");
+  renderAlerts();
+  renderAdminAlerts();
+}
+
+</script>
+
+</body>
+</html>
